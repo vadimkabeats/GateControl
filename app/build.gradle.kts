@@ -40,6 +40,20 @@ android {
 }
 
 dependencies {
+    // Compose
+    implementation(platform("androidx.compose:compose-bom:2024.05.00"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.material:material")
+    implementation("androidx.activity:activity-compose:1.8.0")
+
+// Lifecycle & ViewModel
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+
+// Корутинные Flow для реактивного UI
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.0")
+    implementation("androidx.compose.material:material-icons-extended")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
