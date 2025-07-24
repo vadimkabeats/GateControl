@@ -12,10 +12,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gatecontrol.data.ConnectionState
@@ -66,24 +65,32 @@ fun MainScreen(vm: MainViewModel = viewModel()) {
         )
 
         Spacer(Modifier.height(16.dp))
-        Text(text = "РЕЗУЛЬТАТ: $rez", fontSize = 32.sp, fontWeight = FontWeight.Bold)
+        Text(
+            text = "РЕЗУЛЬТАТ: $rez",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
 
         Spacer(Modifier.height(16.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(
                 onClick = { vm.sendStart() },
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
-            ) {
-                Text("СТАРТ")
-            }
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color(0xFF2E7D32),
+                    contentColor = Color.White
+                )
+            ) { Text("СТАРТ") }
+
             Button(
                 onClick = { vm.sendStop() },
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error)
-            ) {
-                Text("СТОП")
-            }
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color.Red,
+                    contentColor = Color.White
+                )
+            ) { Text("СТОП") }
         }
 
         Spacer(Modifier.height(24.dp))
@@ -98,7 +105,7 @@ fun MainScreen(vm: MainViewModel = viewModel()) {
         SliderParam(
             label = "Время на мишень",
             value = cfg.time,
-            range = 0..91,
+            range = 5..91,
             displayInfinityAt = 91
         ) { vm.updateConfig { copy(time = it) } }
 
@@ -106,7 +113,7 @@ fun MainScreen(vm: MainViewModel = viewModel()) {
         SliderParam(
             label = "Количество мишеней",
             value = cfg.count,
-            range = 0..25
+            range = 2..25
         ) { vm.updateConfig { copy(count = it) } }
 
         Spacer(Modifier.height(16.dp))
@@ -117,17 +124,19 @@ fun MainScreen(vm: MainViewModel = viewModel()) {
             onSelect = { vm.updateConfig { copy(rpa = it) } }
         )
 
-        if (cfg.rpa == 3) {
-            Spacer(Modifier.height(16.dp))
-            SliderParam(
-                label = "Длина серии",
-                value = cfg.seriesLen,
-                range = 0..10
-            ) { vm.updateConfig { copy(seriesLen = it) } }
-        }
+        Spacer(Modifier.height(16.dp))
+        SliderParam(
+            label = "Длина серии",
+            value = cfg.seriesLen,
+            range = 2..10
+        ) { vm.updateConfig { copy(seriesLen = it) } }
 
         Spacer(Modifier.height(16.dp))
-        Text("Скорости пасеров", fontWeight = FontWeight.Medium)
+        Text(
+            text = "Скорости пасеров",
+            fontWeight = FontWeight.Medium,
+            color = Color.Black
+        )
 
         cfg.spd.forEachIndexed { idx, speed ->
             Row(
@@ -146,7 +155,11 @@ fun MainScreen(vm: MainViewModel = viewModel()) {
                         }
                     }
                 )
-                Text("Пасер ${idx + 1}", modifier = Modifier.width(80.dp))
+                Text(
+                    text = "Пасер ${idx + 1}",
+                    modifier = Modifier.width(80.dp),
+                    color = Color.Black
+                )
                 Slider(
                     value = speed.coerceAtLeast(1).toFloat(),
                     onValueChange = { newVal ->
@@ -158,9 +171,18 @@ fun MainScreen(vm: MainViewModel = viewModel()) {
                     },
                     valueRange = 1f..8f,
                     enabled = speed != 0,
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color.Black,
+                        activeTrackColor = Color.Black,
+                        inactiveTrackColor = Color.Black
+                    ),
                     modifier = Modifier.weight(1f)
                 )
-                Text(speed.toString(), modifier = Modifier.padding(start = 8.dp))
+                Text(
+                    text = speed.toString(),
+                    modifier = Modifier.padding(start = 8.dp),
+                    color = Color.Black
+                )
             }
         }
     }

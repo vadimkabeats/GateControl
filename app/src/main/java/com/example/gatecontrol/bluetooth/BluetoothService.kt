@@ -1,5 +1,7 @@
+// File: bluetooth/BluetoothService.kt
 package com.example.gatecontrol.bluetooth
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothSocket
 import kotlinx.coroutines.CoroutineScope
@@ -12,6 +14,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.UUID
 
+@SuppressLint("MissingPermission")
 class BluetoothService(
     private val adapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 ) {
@@ -30,6 +33,7 @@ class BluetoothService(
         }
         false
     }
+
 
     private fun launchReader() {
         socket?.inputStream?.let { stream ->
