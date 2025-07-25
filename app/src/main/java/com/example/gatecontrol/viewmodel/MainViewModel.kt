@@ -1,6 +1,9 @@
+// File: viewmodel/MainViewModel.kt
 package com.example.gatecontrol.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gatecontrol.bluetooth.BluetoothService
 import com.example.gatecontrol.data.ConnectionState
@@ -11,8 +14,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MainViewModel(
-    private val btService: BluetoothService = BluetoothService()
-) : ViewModel() {
+    app: Application
+) : AndroidViewModel(app) {
+
+    private val btService = BluetoothService(app)
 
     private val _connState = MutableStateFlow(ConnectionState.DISCONNECTED)
     val connState: StateFlow<ConnectionState> = _connState
@@ -31,6 +36,7 @@ class MainViewModel(
     private fun observeIncoming() {
         viewModelScope.launch {
             btService.incoming.collect { line ->
+                Log.d("BT_COMMAND", "incoming → $line")
                 when {
                     line.startsWith("PAS") -> handlePas(line.removePrefix("PAS"))
                     line.startsWith("REZ") -> _result.value = line.removePrefix("REZ")
@@ -42,11 +48,8 @@ class MainViewModel(
     fun connect() {
         viewModelScope.launch {
             _connState.value = ConnectionState.CONNECTING
-            if (btService.connect()) {
-                _connState.value = ConnectionState.CONNECTED
-            } else {
-                _connState.value = ConnectionState.DISCONNECTED
-            }
+            if (btService.connect()) _connState.value = ConnectionState.CONNECTED
+            else _connState.value = ConnectionState.DISCONNECTED
         }
     }
 
@@ -69,14 +72,12 @@ class MainViewModel(
         val pasStr = c.spd.joinToString("") { it.toString() }
         val cmd = "REG${c.mode},TIM${c.time},SMI${c.count}," +
                 "RPA${c.rpa},SER${c.seriesLen},PAS$pasStr"
-        viewModelScope.launch {
-            btService.send(cmd)
-        }
+        Log.d("BT_COMMAND", "ViewModel.sendStart() → $cmd")
+        viewModelScope.launch { btService.send(cmd) }
     }
 
     fun sendStop() {
-        viewModelScope.launch {
-            btService.send("STOP")
-        }
+        Log.d("BT_COMMAND", "ViewModel.sendStop() → STOP")
+        viewModelScope.launch { btService.send("STOP") }
     }
 }

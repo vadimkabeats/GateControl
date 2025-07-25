@@ -1,9 +1,12 @@
-// File: bluetooth/BluetoothService.kt
 package com.example.gatecontrol.bluetooth
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothSocket
+import android.content.Context
+import android.content.pm.PackageManager
+import android.util.Log
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -16,6 +19,7 @@ import java.util.UUID
 
 @SuppressLint("MissingPermission")
 class BluetoothService(
+    private val context: Context,
     private val adapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 ) {
     private val deviceName = "smartspro"
@@ -26,14 +30,30 @@ class BluetoothService(
     val incoming: SharedFlow<String> = _incoming
 
     suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
-        adapter.bondedDevices.firstOrNull { it.name == deviceName }?.let { device ->
-            socket = device.createRfcommSocketToServiceRecord(uuid).also { it.connect() }
-            launchReader()
-            return@withContext true
-        }
-        false
-    }
+        if (ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+        ) return@withContext false
+        val btAdapter = adapter ?: return@withContext false
+        if (!btAdapter.isEnabled) return@withContext false
 
+        val device = try {
+            btAdapter.bondedDevices.firstOrNull { it.name == deviceName }
+        } catch (_: SecurityException) {
+            return@withContext false
+        } ?: return@withContext false
+
+        socket = try {
+            device.createRfcommSocketToServiceRecord(uuid)
+                .also { it.connect() }
+        } catch (_: Exception) {
+            return@withContext false
+        }
+
+        launchReader()
+        true
+    }
 
     private fun launchReader() {
         socket?.inputStream?.let { stream ->
@@ -48,11 +68,25 @@ class BluetoothService(
     }
 
     suspend fun send(command: String) = withContext(Dispatchers.IO) {
-        socket?.outputStream?.write((command + "\n").toByteArray())
+        Log.d("BT_COMMAND", "BluetoothService.send() → $command")
+        try {
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    android.Manifest.permission.BLUETOOTH_CONNECT
+                ) != PackageManager.PERMISSION_GRANTED
+            ) return@withContext
+            Log.d("BT_COMMAND", command)
+            socket?.outputStream
+                ?.write((command + "\n").toByteArray())
+        } catch (_: Exception) {
+        }
     }
 
     fun disconnect() {
-        socket?.close()
+        try {
+            socket?.close()
+        } catch (_: Exception) {
+        }
         socket = null
     }
 }

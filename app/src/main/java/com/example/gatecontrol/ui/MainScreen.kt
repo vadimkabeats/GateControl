@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import com.example.gatecontrol.ui.components.DropdownParam
 import com.example.gatecontrol.ui.components.SliderParam
 import kotlin.math.roundToInt
+import android.util.Log
 
 @Composable
 fun MainScreen(vm: MainViewModel = viewModel()) {
@@ -75,7 +76,10 @@ fun MainScreen(vm: MainViewModel = viewModel()) {
         Spacer(Modifier.height(16.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(
-                onClick = { vm.sendStart() },
+                   onClick = {
+                         Log.d("BT_COMMAND", "MainScreen: START_BUTTON clicked")
+                         vm.sendStart()
+                       },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = Color(0xFF2E7D32),
@@ -84,7 +88,10 @@ fun MainScreen(vm: MainViewModel = viewModel()) {
             ) { Text("СТАРТ") }
 
             Button(
-                onClick = { vm.sendStop() },
+                   onClick = {
+                         Log.d("BT_COMMAND", "MainScreen: STOP_BUTTON clicked")
+                         vm.sendStop()
+                      },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = Color.Red,
